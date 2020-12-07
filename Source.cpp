@@ -8,6 +8,7 @@
 #include <set>
 #include <cmath>
 #include <chrono>
+#include <queue>
 
 using namespace std;
 
@@ -166,13 +167,15 @@ int main() {
 		cout << "3. Safest day of the week" << endl;
 		cout << "4. Most unsafe hour of the day" << endl;
 		cout << "5. Most unsafe day of the week" << endl;
+		cout << "6. Find crimes on a given street" << endl;
+		cout << "7. Find crimes of a given type" << endl;
 		//cout << "6. " << endl; // if add more options change the while loop with input for choice to include the addional options
 
 		cout << "0. Exit" << endl << endl;
 		cin >> choice;
 
 
-		if (choice < 0 || choice > 5) {
+		if (choice < 0 || choice > 7) {
 			cout << "Choose a number 0-5" << endl;
 			cin >> choice;
 		}
@@ -180,19 +183,43 @@ int main() {
 			//int count = 0;
 			//string input;
 			if (choice == 1) {
+				//prints how many crimes were in the radius
 				cout << "There were " << crimeList.size() << " crimes in the given radius" << endl << endl;
-				//prints the first 30 crimes in the list
-				if (crimeList.size() > 30) {
-					cout << "First 30 crimes in the area: " << endl;
-					for (int i = 1; i <= 30; ++i) {
+				map<string, int> crimeAmounts;
+
+				//prints the top 5 crimes by occurance, using a map to store how many of each crime there are
+				for (int i = 0; i < crimeList.size(); i++) {
+					crimeAmounts[crimeList[i].crimeType]++;
+				}
+				int max = 0;
+				string name;
+				cout << "Top 5 Crimes by Occurrence: " << endl;
+				for (int i = 0; i < 5; ++i) {
+					for (auto iter : crimeAmounts) {
+						if (iter.second > max) {
+							max = iter.second;
+							name = iter.first;
+						}
+					}
+					cout << i + 1 << ". " << name << ": " << max << endl;
+					crimeAmounts.erase(name);
+					max = 0;
+				}
+
+				cout << endl;
+				//cout << "Total number of crimes : " << crimeList.size() << endl << endl;
+				//prints the first 15 crimes in the list
+				if (crimeList.size() > 15) {
+					cout << "First 15 crimes in the area: " << endl;
+					for (int i = 1; i <= 15; ++i) {
 						cout << i << ". " << crimeList[i].crimeType << ", " << crimeList[i].date << endl;
 						cout << "Address: " << crimeList[i].locName << endl;
 					}
 				}
-				//if the number of crimes is less than 30, prints all crimes
+				//if the number of crimes is less than 15, prints all crimes
 				else {
 					for (int i = 0; i < crimeList.size(); ++i) {
-						cout << i-1 << ". " << crimeList[i].crimeType << ", " << crimeList[i].date << endl;
+						cout << i + 1 << ". " << crimeList[i].crimeType << ", " << crimeList[i].date << endl;
 						cout << "Address: " << crimeList[i].locName << endl;
 					}
 				}
@@ -276,6 +303,64 @@ int main() {
 				cout << fixed;
 				cout << setprecision(2);
 				cout << double(max) * 100.0 / crimeList.size() << " % of crimes in the area happen on " << worstDay << endl;
+			}
+			//Takes in a keyword, searches all crimes in the area and prints if the keyword is in the address
+			if (choice == 6) {
+				string streetName;
+				int count = 0;
+				cout << "Enter a keyword/street name (Enter in all caps): ";
+				cin >> streetName;
+				cout << "First 15 crimes that match your search: " << endl << endl;
+				for (int i = 0; i < crimeList.size(); ++i) { //prints first 15 addresses that match
+					if (crimeList[i].locName.find(streetName) != string::npos) {
+						++count;
+						cout << count << ". " << crimeList[i].crimeType << ", " << crimeList[i].date << endl;
+						cout << "Address: " << crimeList[i].locName << endl;
+					}
+					if (count == 15) {
+						break;
+					}
+				}
+				count = 0;
+				for (int i = 0; i < crimeList.size(); ++i) { //prints how many addresses matched
+					if (crimeList[i].locName.find(streetName) != string::npos) {
+						++count;
+					}
+				}
+				cout << endl;
+				cout << "There were a total of " << count << " crimes that matched your search" << endl;
+				if (count == 0) {
+					cout << "Sorry! No crimes matched your search." << endl;
+				}
+			}
+			//Takes in a keyword, searches all crimes in the area and prints if the keyword is in the crime type
+			if (choice == 7) {
+				string type;
+				int count = 0;
+				cout << "Enter a keyword/crime type (Capitalize first letter): ";
+				cin >> type;
+				cout << "First 15 crimes that match your search: " << endl << endl;
+				for (int i = 0; i < crimeList.size(); ++i) { //prints first 15 crimes that matched
+					if (crimeList[i].crimeType.find(type) != string::npos) {
+						++count;
+						cout << count << ". " << crimeList[i].crimeType << ", " << crimeList[i].date << endl;
+						cout << "Address: " << crimeList[i].locName << endl;
+					}
+					if (count == 15) {
+						break;
+					}
+				}
+				count = 0;
+				for (int i = 0; i < crimeList.size(); ++i) { //prints how many crimes matched
+					if (crimeList[i].crimeType.find(type) != string::npos) {
+						++count;
+					}
+				}
+				cout << endl;
+				cout << "There were a total of " << count << " crimes that matched your search" << endl;
+				if (count == 0) {
+					cout << "Sorry! No crimes matched your search." << endl;
+				}
 			}
 			cin.clear();  // Clear buffer for any later input ( if put in multiple integers)
 		}
