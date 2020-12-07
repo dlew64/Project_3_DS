@@ -123,23 +123,22 @@ int main() {
 	double searchLat, searchLong;
 
 	cout << "Welcome to Gainesville Crime Mapper" << endl;
-	cout << "This program performs data analysis on the number and types of crimes in Gainesville, Florida" << endl << endl;
+	cout << "This program performs data analysis on the number and types of crimes in Gainesville, Florida since 2011" << endl << endl;
 	cout << "To get started, enter a location to search around, and the search radius" << endl;
 
 	//cout << "Latitude and Longitude of a location, seperated by a comma (such as 29.610001, -82.36123) - ";
 	cout << "Enter a latitude centered near 29" << endl;
 	cin >> searchLat;
-	cout << "Enter a longitude centered near -82" << endl;
-	cin >> searchLong;
-
-	// add input handling here
 	while (searchLat > 32 || searchLat < 27) {
-		cout << "Enter a Latitude closer to 29";
+		cout << "Enter a Latitude closer to 29" << endl;
 		cin >> searchLat;
 	}
+	cout << "Enter a longitude centered near -82" << endl;
+	cin >> searchLong;
+	// add input handling here
 
 	while (searchLong > -79 || searchLat < -85) {
-		cout << "Enter a Latitude closer to -82";
+		cout << "Enter a Latitude closer to -82" << endl;
 		cin >> searchLong;
 	}
 	vector<crime> crimeList;
@@ -169,14 +168,15 @@ int main() {
 		cout << "5. Most unsafe day of the week" << endl;
 		cout << "6. Find crimes on a given street" << endl;
 		cout << "7. Find crimes of a given type" << endl;
+		cout << "8. Change radius and location" << endl;
 		//cout << "6. " << endl; // if add more options change the while loop with input for choice to include the addional options
 
 		cout << "0. Exit" << endl << endl;
 		cin >> choice;
 
 
-		if (choice < 0 || choice > 7) {
-			cout << "Choose a number 0-5" << endl;
+		if (choice < 0 || choice > 8) {
+			cout << "Choose a number 0-8" << endl;
 			cin >> choice;
 		}
 		else {
@@ -184,7 +184,7 @@ int main() {
 			//string input;
 			if (choice == 1) {
 				//prints how many crimes were in the radius
-				cout << "There were " << crimeList.size() << " crimes in the given radius" << endl << endl;
+				cout << "There were " << crimeList.size() << " crimes in the given radius since 2011" << endl << endl;
 				map<string, int> crimeAmounts;
 
 				//prints the top 5 crimes by occurance, using a map to store how many of each crime there are
@@ -361,6 +361,36 @@ int main() {
 				if (count == 0) {
 					cout << "Sorry! No crimes matched your search." << endl;
 				}
+			}
+			if (choice == 8) {
+				crimes = 0;
+				radius = 0;
+				while (crimes == 0) {
+					cout << "Enter a latitude centered near 29" << endl;
+					cin >> searchLat;
+					while (searchLat > 32 || searchLat < 27) {
+						cout << "Enter a Latitude closer to 29" << endl;
+						cin >> searchLat;
+					}
+					cout << "Enter a longitude centered near -82" << endl;
+					cin >> searchLong;
+
+					// add input handling here
+					while (searchLong > -79 || searchLat < -85) {
+						cout << "Enter a Latitude closer to -82" << endl;
+						cin >> searchLong;
+					}
+					//asks user for radius, then uses getCrimes to create a vector of all crimes in the radius
+					cout << "Choose Radius (km): " << endl;
+					cin >> radius;
+					crimeList = dataStrucs.getCrimes({ searchLong, searchLat }, radius);
+					crimes = crimeList.size();
+					if (crimes == 0) {
+						cout << "Oops! There were no crimes within that radius, enter another radius" << endl;
+					}
+				}
+				cout << "Radius changed to " << radius << " km." << endl;
+
 			}
 			cin.clear();  // Clear buffer for any later input ( if put in multiple integers)
 		}
