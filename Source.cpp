@@ -110,6 +110,7 @@ struct container {
 };
 
 bool loadData(container& c);
+void getInput(istream& i, double& searchLat, double& searchLong, double& radius, vector<crime>& crimeList, container& dataStrucs);
 
 int main() {
 	// initialize data structures
@@ -120,47 +121,20 @@ int main() {
 	// load file data into structures
 	loadData(dataStrucs);
 
-	double searchLat, searchLong;
+	vector<crime> crimeList;
+	double searchLat, searchLong, radius;
 
 	cout << "Welcome to Gainesville Crime Mapper" << endl;
 	cout << "This program performs data analysis on the number and types of crimes in Gainesville, Florida since 2011" << endl << endl;
 	cout << "To get started, enter a location to search around, and the search radius" << endl;
 
-	//cout << "Latitude and Longitude of a location, seperated by a comma (such as 29.610001, -82.36123) - ";
-	cout << "Enter a latitude centered near 29" << endl;
-	cin >> searchLat;
-	while (searchLat > 32 || searchLat < 27) {
-		cout << "Enter a Latitude closer to 29" << endl;
-		cin >> searchLat;
-	}
-	cout << "Enter a longitude centered near -82" << endl;
-	cin >> searchLong;
-	// add input handling here
-
-	while (searchLong > -79 || searchLat < -85) {
-		cout << "Enter a Latitude closer to -82" << endl;
-		cin >> searchLong;
-	}
-	vector<crime> crimeList;
-	int crimes = 0;
-	double radius = 0;
-	while (crimes == 0){
-		//asks user for radius, then uses getCrimes to create a vector of all crimes in the radius
-		cout << "Choose Radius (km): " << endl;
-		cin >> radius;
-		crimeList = dataStrucs.getCrimes({ searchLong, searchLat }, radius);
-		crimes = crimeList.size();
-		if (crimes == 0) {
-			cout << "Oops! There were no crimes within that radius, enter another radius" << endl;
-		}
-	}
-
+	getInput(cin, searchLat, searchLong, radius, crimeList, dataStrucs);
 
 	//int choice = INT_MAX;
 	int choice = 2;
 	while (choice != 0) {
 		cout << endl;
-		cout << "Pick a search option - all options are within " << radius << " km or the given location" << endl;
+		cout << "Pick a search option - all options are within " << radius << " km of the given location" << endl;
 		cout << "1. Overview of crimes within " << radius << " km" << endl;
 		cout << "2. Safest hour of the day" << endl;
 		cout << "3. Safest day of the week" << endl;
@@ -363,33 +337,15 @@ int main() {
 				}
 			}
 			if (choice == 8) {
-				crimes = 0;
+				// pick a new point and radius
+				// resets input
+				crimeList.clear();
 				radius = 0;
-				while (crimes == 0) {
-					cout << "Enter a latitude centered near 29" << endl;
-					cin >> searchLat;
-					while (searchLat > 32 || searchLat < 27) {
-						cout << "Enter a Latitude closer to 29" << endl;
-						cin >> searchLat;
-					}
-					cout << "Enter a longitude centered near -82" << endl;
-					cin >> searchLong;
+				searchLong = 0;
+				searchLat = 0;
 
-					// add input handling here
-					while (searchLong > -79 || searchLat < -85) {
-						cout << "Enter a Latitude closer to -82" << endl;
-						cin >> searchLong;
-					}
-					//asks user for radius, then uses getCrimes to create a vector of all crimes in the radius
-					cout << "Choose Radius (km): " << endl;
-					cin >> radius;
-					crimeList = dataStrucs.getCrimes({ searchLong, searchLat }, radius);
-					crimes = crimeList.size();
-					if (crimes == 0) {
-						cout << "Oops! There were no crimes within that radius, enter another radius" << endl;
-					}
-				}
-				cout << "Radius changed to " << radius << " km." << endl;
+				// calls get input
+				getInput(cin, searchLat, searchLong, radius, crimeList, dataStrucs);
 
 			}
 			cin.clear();  // Clear buffer for any later input ( if put in multiple integers)
@@ -493,4 +449,58 @@ bool loadData(container& data) {
 		}
 	}
 	return true;
+}
+void getInput(istream& i, double& searchLat, double& searchLong, double& radius, vector<crime>& crimeList, container& dataStrucs) {
+	int numCrimes = 0;
+
+	string input;
+	while (numCrimes == 0) {
+		cin.clear();
+		cout << "Enter a latitude centered near latitude 29" << endl;
+		do {
+			cin >> input;
+			try {
+				searchLat = stod(input);
+				break;
+			}
+			catch (exception e) { cout << "Enter a latitude in the form of a double, such as 29.610001" << endl; continue; }
+			if (searchLat > 32 || searchLat < 27) cout << "Enter a latitude closer to 29" << endl;
+			cin.clear();
+		} while (searchLat > 32 || searchLat < 27);
+
+		cin.clear();
+		cout << "Enter a longitude centered near -82" << endl;
+		do {
+
+			cin >> input;
+			try {
+				searchLong = stod(input);
+			}
+			catch (exception e) { cout << "Enter a longitude in the form of a double, such as -82.00000" << endl; continue; }
+			if (searchLong > -79 || searchLat < -85) cout << "Enter a longitude closer to -82" << endl;
+			cin.clear();
+		} while (searchLong > -79 || searchLat < -85);
+
+		cin.clear();
+		//asks user for radius, then uses getCrimes to create a vector of all crimes in the radius
+		radius = 0;
+		cout << "Enter a search radius (km): " << endl;
+		do {
+			cin >> input;
+			try {
+				radius = stod(input);
+			}
+			catch (exception e) { cout << "Enter a radius in the form of a double, such as 1.2" << endl; continue; }
+			if (radius <= 0) cout << "Enter a positive non-zero radius" << endl;
+			cin.clear();
+		} while (radius <= 0);
+
+		cout << endl << endl;
+		crimeList = dataStrucs.getCrimes({ searchLong, searchLat }, radius);
+		numCrimes = crimeList.size();
+		if (numCrimes == 0) {
+			cout << "Oops! There were no crimes within that radius, enter another radius" << endl << endl;
+		}
+	}
+	cin.clear();
 }
